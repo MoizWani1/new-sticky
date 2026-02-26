@@ -52,14 +52,14 @@ export default async function Home({
         )}
 
         {/* All Products Grid styled to match the simple UI */}
-        <section id="all-products" className="container mx-auto px-4 py-16">
+        <section id="all-products" className="container mx-auto px-4 pt-8 pb-4">
           <h2 className="font-display text-3xl md:text-5xl font-extrabold text-center mb-10">
             {showHeroAndFeatured ? "More Sticky Goodness" : "All Products"}
           </h2>
 
           <ProductGrid products={products || []} />
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-6 flex justify-center">
             <PaginationControls
               hasNextPage={end < (count ?? 0)}
               hasPrevPage={start > 0}

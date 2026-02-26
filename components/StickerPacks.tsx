@@ -12,7 +12,7 @@ const themes = [
 
 const StickerThemes = () => {
     return (
-        <section id="themes" className="container mx-auto px-4 pt-0 pb-16">
+        <section id="themes" className="container mx-auto px-4 pt-0 pb-8">
             <h2 className="font-display text-3xl md:text-5xl font-extrabold text-center mb-10">
                 Sticker Themes
             </h2>
