@@ -106,7 +106,7 @@ const FreshPeel = ({ products }: { products: Product[] }) => {
                                         <p className="font-display font-bold text-base md:text-lg leading-tight mb-1 line-clamp-2 hover:text-primary transition-colors">{product.name}</p>
                                     </Link>
                                     <p className="font-body font-bold text-sticker-green text-sm md:text-base mb-2">
-                                        Rs. {displayPrice} {isPack ? <span className="text-[10px] text-muted-foreground font-medium">/ piece</span> : ''}
+                                        Rs. {displayPrice}
                                     </p>
 
                                     <div className="flex gap-2 mt-auto">

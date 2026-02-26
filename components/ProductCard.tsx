@@ -96,7 +96,6 @@ export default function ProductCard({ product }: { product: Product }) {
                         ) : (
                             <div className="flex flex-col">
                                 <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displayPrice}</span>
-                                {isPack && <span className="text-[10px] text-muted-foreground font-medium">/ piece</span>}
                             </div>
                         )}
 
