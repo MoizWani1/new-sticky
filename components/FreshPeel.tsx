@@ -75,6 +75,8 @@ const FreshPeel = ({ products }: { products: Product[] }) => {
                     {products.slice(startIndex, startIndex + visibleCount).map((product) => {
                         const isPack = product.type === 'Pack'
                         const displayPrice = isPack ? (product.sticker_price || 35) : product.price
+                        const displaySalePrice = isPack ? null : product.sale_price;
+                        const finalPrice = displaySalePrice && displaySalePrice > 0 && displaySalePrice < displayPrice ? displaySalePrice : displayPrice;
                         const image = product.image_url || (product?.images && product.images.length > 0 ? product.images[0] : null) || 'https://placehold.co/400x400/png?text=No+Image'
 
                         // Create dynamic peeling sticker shapes
@@ -88,7 +90,7 @@ const FreshPeel = ({ products }: { products: Product[] }) => {
                         const shapeClass = peelStyles[shapeIndex]
 
                         return (
-                            <div key={product.id} className={`bg-card ${shapeClass} p-3 md:p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all group flex flex-col border-2 border-primary/10 relative`}>
+                            <div key={product.id} className={`h-full bg-card ${shapeClass} p-3 md:p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all group flex flex-col border-2 border-primary/10 relative`}>
                                 <Link
                                     href={`/product/${product.id}`}
                                     className="block aspect-square flex items-center justify-center p-4 mb-3 relative overflow-hidden bg-background rounded-xl"
@@ -105,33 +107,52 @@ const FreshPeel = ({ products }: { products: Product[] }) => {
                                     <Link href={`/product/${product.id}`}>
                                         <p className="font-display font-bold text-base md:text-lg leading-tight mb-1 line-clamp-2 hover:text-primary transition-colors">{product.name}</p>
                                     </Link>
-                                    <p className="font-body font-bold text-sticker-green text-sm md:text-base mb-2">
-                                        Rs. {displayPrice}
-                                    </p>
 
-                                    <div className="flex gap-2 mt-auto">
-                                        <button
-                                            onClick={(e) => handleAddToCart(e, product, image, displayPrice)}
-                                            disabled={product.stock_status === 'out_of_stock'}
-                                            className={`flex flex-1 items-center justify-center py-2 rounded-xl font-display font-bold text-sm tracking-wide transition-all ${product.stock_status === 'out_of_stock'
-                                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                                : 'bg-primary/10 text-primary hover:bg-primary/20 active:scale-95'
-                                                }`}
-                                        >
-                                            <ShoppingCart className="w-4 h-4 md:mr-1" />
-                                            <span className="hidden md:inline">Add</span>
-                                        </button>
-                                        <button
-                                            onClick={(e) => handleBuyNow(e, product, image, displayPrice)}
-                                            disabled={product.stock_status === 'out_of_stock'}
-                                            className={`flex flex-1 items-center justify-center py-2 rounded-xl font-display font-bold text-sm tracking-wide transition-all ${product.stock_status === 'out_of_stock'
-                                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                                : 'bg-primary text-primary-foreground hover:scale-105 active:scale-95 shadow-md'
-                                                }`}
-                                        >
-                                            <CreditCard className="w-4 h-4 md:mr-1" />
-                                            <span className="hidden md:inline">Buy</span>
-                                        </button>
+                                    <div className="mt-auto pt-2 flex flex-col gap-2">
+                                        <div className="flex items-center justify-between">
+                                            {displaySalePrice && displaySalePrice > 0 && displaySalePrice < displayPrice ? (
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-muted-foreground line-through">Rs. {displayPrice}{isPack ? ' / Sticker' : ''}</span>
+                                                    <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displaySalePrice}{isPack ? ' / Sticker' : ''}</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displayPrice}{isPack ? ' / Sticker' : ''}</span>
+                                                </div>
+                                            )}
+
+                                            {product.stock_status === 'out_of_stock' && (
+                                                <span className="text-destructive font-bold text-[10px] md:text-xs bg-destructive/10 px-2 py-0.5 rounded">Out of Stock</span>
+                                            )}
+                                            {product.stock_status === 'low_stock' && (
+                                                <span className="text-sticker-orange font-bold text-[10px] md:text-xs bg-sticker-orange/10 px-2 py-0.5 rounded">Low Stock</span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-2 mt-1">
+                                            <button
+                                                onClick={(e) => handleAddToCart(e, product, image, finalPrice)}
+                                                disabled={product.stock_status === 'out_of_stock'}
+                                                className={`flex flex-1 items-center justify-center py-2 rounded-xl font-display font-bold text-sm tracking-wide transition-all ${product.stock_status === 'out_of_stock'
+                                                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                    : 'bg-primary/10 text-primary hover:bg-primary/20 active:scale-95'
+                                                    }`}
+                                            >
+                                                <ShoppingCart className="w-4 h-4 md:mr-1" />
+                                                <span className="hidden md:inline">Add</span>
+                                            </button>
+                                            <button
+                                                onClick={(e) => handleBuyNow(e, product, image, finalPrice)}
+                                                disabled={product.stock_status === 'out_of_stock'}
+                                                className={`flex flex-1 items-center justify-center py-2 rounded-xl font-display font-bold text-sm tracking-wide transition-all ${product.stock_status === 'out_of_stock'
+                                                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                    : 'bg-primary text-primary-foreground hover:scale-105 active:scale-95 shadow-md'
+                                                    }`}
+                                            >
+                                                <CreditCard className="w-4 h-4 md:mr-1" />
+                                                <span className="hidden md:inline">Buy</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

@@ -67,7 +67,7 @@ export default function ProductCard({ product }: { product: Product }) {
     const shapeClass = peelStyles[shapeIndex]
 
     return (
-        <div className={`bg-card ${shapeClass} p-3 md:p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all group flex flex-col border-2 border-primary/10 relative`}>
+        <div className={`h-full bg-card ${shapeClass} p-3 md:p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all group flex flex-col border-2 border-primary/10 relative`}>
             <Link href={`/product/${product.id}`} className="block aspect-square flex items-center justify-center p-2 mb-3 relative overflow-hidden bg-background rounded-xl">
                 <Image
                     src={image}
@@ -86,16 +86,16 @@ export default function ProductCard({ product }: { product: Product }) {
                     </h3>
                 </Link>
 
-                <div className="mt-2 flex flex-col gap-2">
+                <div className="mt-auto pt-2 flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                         {displaySalePrice && displaySalePrice > 0 && displaySalePrice < displayPrice ? (
                             <div className="flex flex-col">
-                                <span className="text-xs text-muted-foreground line-through">Rs. {displayPrice}</span>
-                                <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displaySalePrice}</span>
+                                <span className="text-xs text-muted-foreground line-through">Rs. {displayPrice}{isPack ? ' / Sticker' : ''}</span>
+                                <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displaySalePrice}{isPack ? ' / Sticker' : ''}</span>
                             </div>
                         ) : (
                             <div className="flex flex-col">
-                                <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displayPrice}</span>
+                                <span className="text-sm md:text-base font-bold text-sticker-green">Rs. {displayPrice}{isPack ? ' / Sticker' : ''}</span>
                             </div>
                         )}
 

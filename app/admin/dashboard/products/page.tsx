@@ -116,13 +116,11 @@ export default function ProductsPage() {
         try {
             const uploadedUrls: string[] = []
             const imagesToProcess = newProduct.images
+            const packStickersToProcess = newProduct.type === 'Pack' ? newProduct.packStickers.filter(s => s.file) : []
 
-            // Calculate total items to process (only Blobs need processing/uploading)
-            const filesToProcess = imagesToProcess.filter(item => item instanceof Blob).length
-            // Existing strings count as "already done" effectively, but for the user it's clearer 
-            // to show progress of the *active* operation. 
-            // Let's count total items in the array to show overall progress "Processing image 1 of 3..."
-            setUploadProgress({ current: 0, total: imagesToProcess.length })
+            // Calculate total items to process
+            const totalItems = imagesToProcess.length + packStickersToProcess.length
+            setUploadProgress({ current: 0, total: totalItems })
 
             let processedCount = 0
 
@@ -162,37 +160,55 @@ export default function ProductsPage() {
             // Upload pack stickers if any
             const processedPackStickers = []
             if (newProduct.type === 'Pack') {
-                for (const sticker of newProduct.packStickers) {
-                    if (sticker.file) {
-                        const fileExt = sticker.file.name ? sticker.file.name.split('.').pop() : 'png'
-                        const fileName = `pack-sticker-${Math.random()}.${fileExt}`
+                // Upload in chunks of 5 to avoid memory/network bottleneck but still be fast
+                const chunkSize = 5;
+                for (let i = 0; i < newProduct.packStickers.length; i += chunkSize) {
+                    const chunk = newProduct.packStickers.slice(i, i + chunkSize);
 
-                        const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true }
-                        const compressedSticker = await imageCompression(sticker.file, options).catch(() => sticker.file)
+                    const chunkResults = await Promise.all(chunk.map(async (sticker) => {
+                        if (sticker.file) {
+                            const fileExt = sticker.file.name ? sticker.file.name.split('.').pop() : 'png'
+                            const fileName = `pack-sticker-${Math.random()}.${fileExt}`
 
-                        if (!compressedSticker) continue; // TS guard
+                            const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1000, useWebWorker: true }
+                            const compressedSticker = await imageCompression(sticker.file, options).catch(() => sticker.file)
 
-                        const { error: uploadError } = await supabase.storage
-                            .from('product-images')
-                            .upload(fileName, compressedSticker)
+                            if (!compressedSticker) return null;
 
-                        if (!uploadError) {
-                            const { data: { publicUrl } } = supabase.storage
+                            const { error: uploadError } = await supabase.storage
                                 .from('product-images')
-                                .getPublicUrl(fileName)
+                                .upload(fileName, compressedSticker)
 
-                            processedPackStickers.push({
+                            let publicUrl = null;
+                            if (!uploadError) {
+                                const { data } = supabase.storage
+                                    .from('product-images')
+                                    .getPublicUrl(fileName)
+                                publicUrl = data.publicUrl
+                            }
+
+                            processedCount++
+                            setUploadProgress(prev => ({ ...prev, current: processedCount }))
+
+                            if (publicUrl) {
+                                return {
+                                    id: sticker.id || Math.random().toString(36).substr(2, 9),
+                                    name: sticker.name || 'Sticker',
+                                    image_url: publicUrl
+                                }
+                            }
+                        } else if (sticker.image_url) {
+                            return {
                                 id: sticker.id || Math.random().toString(36).substr(2, 9),
                                 name: sticker.name || 'Sticker',
-                                image_url: publicUrl
-                            })
+                                image_url: sticker.image_url
+                            }
                         }
-                    } else if (sticker.image_url) {
-                        processedPackStickers.push({
-                            id: sticker.id || Math.random().toString(36).substr(2, 9),
-                            name: sticker.name || 'Sticker',
-                            image_url: sticker.image_url
-                        })
+                        return null;
+                    }));
+
+                    for (const res of chunkResults) {
+                        if (res) processedPackStickers.push(res);
                     }
                 }
             }
