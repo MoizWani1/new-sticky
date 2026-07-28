@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@google/generative-ai": "^0.24.1",
     "@imgly/background-removal-data": "^1.4.5",
     "@supabase/supabase-js": "^2.89.0",
@@ -22,6 +21,7 @@
     "nextjs-toploader": "^3.9.17",
     "react": "^18",
     "react-dom": "^18",
+    "resend": "^6.18.0",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^5.0.9"
   },
